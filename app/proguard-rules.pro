@@ -29,6 +29,8 @@
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 
+-keepattributes Annotations
+
 -dontwarn okio.**
 
 -keepclassmembers public abstract class moe.banana.jsonapi2.** { *; }

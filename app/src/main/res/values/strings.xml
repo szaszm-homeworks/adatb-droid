@@ -7,11 +7,14 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="error_invalid_username">This username address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
     <string name="remember_credentials">Remember credentials</string>
+    <string name="loading_news">Loading news...</string>
+    <string name="news">News</string>
+    <string name="ok" >Ok</string>
+    <string name="title">Title</string>
 </resources>

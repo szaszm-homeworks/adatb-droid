@@ -6,7 +6,7 @@ import android.annotation.TargetApi;
 
 import android.app.Activity;
 
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 
@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 /**
  * A login screen that offers login via username/password.
@@ -44,15 +45,24 @@ public class LoginActivity extends Activity {
     private CheckBox mRememberCredentials;
     private View mProgressView;
     private View mLoginFormView;
+    private FecskeSession fecske;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        fecske = FecskeSession.getInstance();
+        if(fecske.getToken() != null) {
+            switchToMainActivity();
+        }
+
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
         mRememberCredentials = (CheckBox) findViewById(R.id.remember_credentials);
+        Toolbar toolbar = findViewById(R.id.loginToolbar);
+        setActionBar(toolbar);
 
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -102,13 +112,6 @@ public class LoginActivity extends Activity {
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
-
         // Check for a valid username
         if (TextUtils.isEmpty(username)) {
             mUsernameView.setError(getString(R.string.error_field_required));
@@ -146,10 +149,6 @@ public class LoginActivity extends Activity {
         return new Pair<>(username, password);
     }
 
-    private boolean isPasswordValid(String password) {
-        return password.length() > 4;
-    }
-
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -179,6 +178,15 @@ public class LoginActivity extends Activity {
         });
     }
 
+    private void switchToMainActivity()
+    {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -195,9 +203,8 @@ public class LoginActivity extends Activity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            FecskeSession session = FecskeSession.getInstance();
             try {
-                session.tryAuth(mUsername, mPassword);
+                fecske.tryAuth(mUsername, mPassword);
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
@@ -215,7 +222,8 @@ public class LoginActivity extends Activity {
                 if(mRememberCredentials.isChecked()) {
                     saveLoginData(mUsername, mPassword);
                 }
-                finish();
+                //finish();
+                switchToMainActivity();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
