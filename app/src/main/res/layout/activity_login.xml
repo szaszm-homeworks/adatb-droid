@@ -14,6 +14,8 @@
         android:id="@+id/loginToolbar"
         android:elevation="4dp"
         android:title="@string/action_sign_in"
+        android:background="#ff222222"
+        android:titleTextColor="#ffeeeeee"
         >
     </Toolbar>
 

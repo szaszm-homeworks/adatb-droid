@@ -17,4 +17,5 @@
     <string name="news">News</string>
     <string name="ok" >Ok</string>
     <string name="title">Title</string>
+    <string name="sign_out">Sign out</string>
 </resources>

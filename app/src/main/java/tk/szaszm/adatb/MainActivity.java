@@ -1,12 +1,19 @@
 package tk.szaszm.adatb;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
+import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import java.util.List;
 
@@ -18,6 +25,9 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
     private List<News> newsList = null;
     private boolean justLoggedIn = false;
     private FecskeSession fecske;
+    private ListView drawerList;
+    private Toolbar toolbar;
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +36,32 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
 
         mainLayout = findViewById(R.id.mainLayout);
         textView = findViewById(R.id.textView1);
+        drawerList = findViewById(R.id.drawerList);
+        toolbar = findViewById(R.id.mainToolbar);
+        drawerLayout = findViewById(R.id.drawerLayout);
+
+        setActionBar(toolbar);
+        ActionBar actionbar = getActionBar();
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_action_menu_white);
+        actionbar.setDisplayHomeAsUpEnabled(true);
 
         fecske = FecskeSession.getInstance();
 
+        addDrawerElements();
+
         switchToNewsView();
+    }
+
+    private void addDrawerElements() {
+        String[] items = { "News", "Labor1" };
+        drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+
+        drawerList.setOnItemClickListener((parent, view, position, id) -> {
+            final String item = (String) parent.getItemAtPosition(position);
+            if(item.equals("News")) switchToNewsView();
+            else System.out.println(item);
+            drawerLayout.closeDrawer(Gravity.START);
+        });
     }
 
     private void loadNews()
@@ -78,5 +110,15 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
     @Override
     public void onListFragmentInteraction(News item) {
         NewsDialogFragment.newInstance(item.title, item.text).show(getFragmentManager(), NewsDialogFragment.TAG);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        switch(itemId) {
+            case android.R.id.home:
+                drawerLayout.openDrawer(Gravity.START); return true;
+        }
+        return true;
     }
 }
