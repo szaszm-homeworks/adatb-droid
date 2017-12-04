@@ -1,5 +1,6 @@
 package tk.szaszm.adatb.model;
 
+import moe.banana.jsonapi2.HasMany;
 import moe.banana.jsonapi2.JsonApi;
 import moe.banana.jsonapi2.Resource;
 
@@ -9,5 +10,9 @@ import moe.banana.jsonapi2.Resource;
 
 @JsonApi(type="Users")
 public class Users extends Resource {
-
+    public String displayName;
+    public String loginName;
+    public String email;
+    public String neptun;
+    public HasMany<StudentRegistrations> StudentRegistrations;
 }

@@ -15,9 +15,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toolbar;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import moe.banana.jsonapi2.ResourceIdentifier;
+import tk.szaszm.adatb.event.EventDispatcher;
+import tk.szaszm.adatb.event.EventLoadedEvent;
+import tk.szaszm.adatb.model.Events;
 import tk.szaszm.adatb.model.News;
+import tk.szaszm.adatb.model.StudentRegistrations;
+import tk.szaszm.adatb.model.Users;
 
 public class MainActivity extends Activity implements NewsFragment.OnListFragmentInteractionListener {
     private LinearLayout mainLayout;
@@ -28,6 +35,7 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
     private ListView drawerList;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
+    private ArrayList<DrawerItem> drawerItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +55,22 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
 
         fecske = FecskeSession.getInstance();
 
-        addDrawerElements();
+        setupDrawerElements();
+
+        asyncLoadUser();
 
         switchToNewsView();
     }
 
-    private void addDrawerElements() {
-        String[] items = { "News", "Labor1" };
-        drawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
+    private void setupDrawerElements() {
+        drawerItems.clear();
+        drawerItems.add(new DrawerItem("News", item -> switchToNewsView()));
+        drawerList.setAdapter(new ArrayAdapter<DrawerItem>(this, android.R.layout.simple_list_item_1, drawerItems));
 
         drawerList.setOnItemClickListener((parent, view, position, id) -> {
-            final String item = (String) parent.getItemAtPosition(position);
-            if(item.equals("News")) switchToNewsView();
-            else System.out.println(item);
+            final DrawerItem item = (DrawerItem) parent.getItemAtPosition(position);
+            System.out.println("Selected DrawerItem: " + item.label);
+            item.click();
             drawerLayout.closeDrawer(Gravity.START);
         });
     }
@@ -103,6 +114,112 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
                 NewsFragment newsFragment = NewsFragment.newInstance(newsList);
                 transaction.add(R.id.mainLayout, newsFragment);
                 transaction.commit();
+            }
+        }.execute();
+    }
+
+    static class RetrieveEventAsyncTask extends AsyncTask<Void, Void, Void>
+    {
+        int eventId;
+
+        Events event = null;
+        FecskeSession fecske;
+        EventDispatcher dispatcher;
+
+        public RetrieveEventAsyncTask(FecskeSession fecske, EventDispatcher dispatcher, int id)
+        {
+            this.fecske = fecske;
+            this.dispatcher = dispatcher;
+            eventId = id;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                event = fecske.getEvent(eventId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            dispatcher.dispatch(new EventLoadedEvent(event));
+        }
+
+        public Events getEvent() {
+            return event;
+        }
+    }
+
+    private void asyncLoadUser()
+    {
+        int userId = fecske.getTokenData().userId;
+        new AsyncTask<Void, Void, Void>() {
+            Users user;
+            StudentRegistrations studentRegistration;
+            List<Integer> eventIds;
+            List<Events> events = new ArrayList<>();
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    user = fecske.getUser(userId);
+                    System.out.println("loaded user " + user.displayName + "\t" + user.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                List<Integer> studentRegistrationIds = new ArrayList<>();
+                for (ResourceIdentifier resourceIdentifier : user.StudentRegistrations) {
+                    studentRegistrationIds.add(Integer.valueOf(resourceIdentifier.getId()));
+                }
+
+                // fecske doesn't handle multiple semesters yet
+                int studentRegistrationId = studentRegistrationIds.get(0);
+
+                System.out.println("StudentRegistrationId: " + studentRegistrationId);
+
+                try {
+                    studentRegistration = fecske.getStudentRegistration(studentRegistrationId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("StudentRegistration: " + studentRegistration + ", course code: " + studentRegistration.neptunCourseCode);
+
+                eventIds = new ArrayList<>();
+                for (ResourceIdentifier resourceIdentifier : studentRegistration.Events) {
+                    eventIds.add(Integer.valueOf(resourceIdentifier.getId()));
+                }
+
+                return null;
+            }
+
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                EventDispatcher loadDispatcher = new EventDispatcher();
+                loadDispatcher.listen(EventLoadedEvent.class, ev -> {
+                    synchronized (events) {
+                        events.add(ev.getEvent());
+                        if(events.size() == eventIds.size()) {
+                            for (Events event : events) {
+                                final String label = event.getLabel();
+                                drawerItems.add(new DrawerItem(event.getLabel(), item -> {
+                                    System.out.println(label + " clicked");
+                                }));
+                            }
+                        }
+                    }
+
+                });
+
+                for (Integer eventId : eventIds) {
+                    RetrieveEventAsyncTask task = new RetrieveEventAsyncTask(fecske, loadDispatcher, eventId);
+                    task.execute();
+                }
             }
         }.execute();
     }

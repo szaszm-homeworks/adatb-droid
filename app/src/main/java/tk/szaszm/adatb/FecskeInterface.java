@@ -9,7 +9,11 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
+import tk.szaszm.adatb.model.Events;
 import tk.szaszm.adatb.model.News;
+import tk.szaszm.adatb.model.Users;
+import tk.szaszm.adatb.model.StudentRegistrations;
 
 
 public interface FecskeInterface {
@@ -25,4 +29,13 @@ public interface FecskeInterface {
     @GET("news")
     Call<List<News>> news(@Header("Authorization") String authorization);
 
+
+    @GET("users/{id}")
+    Call<Users> users(@Header("Authorization") String authorization, @Path("id") int id);
+
+    @GET("student-registrations/{id}")
+    Call<StudentRegistrations> studentRegistrations(@Header("Authorization") String authorization, @Path("id") int id);
+
+    @GET("events/{id}")
+    Call<Events> events(@Header("Authorization") String authorization, @Path("id") int id);
 }

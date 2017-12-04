@@ -10,7 +10,7 @@ import java.util.Map;
 public class EventDispatcher {
     private Map<Class, ArrayList> listeners;
 
-    private EventDispatcher() {
+    public EventDispatcher() {
         listeners = new HashMap<>();
     }
     private static EventDispatcher instance = null;
@@ -38,5 +38,14 @@ public class EventDispatcher {
                 listener.handleEvent(event);
             }
         }
+    }
+
+    public <E> void removeListener(Class<E> eventType, EventListener<E> listener) {
+        if(!listeners.containsKey(eventType)) {
+            return;
+        }
+
+        ArrayList<EventListener<E>> listeners = (ArrayList<EventListener<E>>)this.listeners.get(eventType);
+        listeners.remove(listener);
     }
 }
