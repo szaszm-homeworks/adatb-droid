@@ -16,8 +16,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import tk.szaszm.adatb.event.EventDispatcher;
-import tk.szaszm.adatb.event.LoginEvent;
 import tk.szaszm.adatb.model.DeliverableTemplates;
 import tk.szaszm.adatb.model.Deliverables;
 import tk.szaszm.adatb.model.EventTemplates;
@@ -48,7 +46,6 @@ public class FecskeSession {
     private FecskeInterface fecske;
     private Moshi moshi;
     private Gson gson;
-    private EventDispatcher dispatcher;
 
     private FecskeSession()
     {
@@ -77,8 +74,6 @@ public class FecskeSession {
                 .build();
 
         fecske = retrofit.create(FecskeInterface.class);
-
-        dispatcher = EventDispatcher.getInstance();
     }
 
 
@@ -118,8 +113,6 @@ public class FecskeSession {
 
         System.out.println("logged in, token: " + token);
         parseJwtToken(token);
-
-        dispatcher.dispatch(new LoginEvent());
     }
 
     public List<News> getNews() throws Exception {

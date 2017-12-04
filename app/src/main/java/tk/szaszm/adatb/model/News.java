@@ -1,7 +1,5 @@
 package tk.szaszm.adatb.model;
 
-import java.util.Date;
-
 import moe.banana.jsonapi2.JsonApi;
 import moe.banana.jsonapi2.Resource;
 

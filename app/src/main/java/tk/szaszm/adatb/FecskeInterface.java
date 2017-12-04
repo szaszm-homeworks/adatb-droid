@@ -12,8 +12,8 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import tk.szaszm.adatb.model.Events;
 import tk.szaszm.adatb.model.News;
-import tk.szaszm.adatb.model.Users;
 import tk.szaszm.adatb.model.StudentRegistrations;
+import tk.szaszm.adatb.model.Users;
 
 
 public interface FecskeInterface {

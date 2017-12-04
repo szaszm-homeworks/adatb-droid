@@ -3,13 +3,10 @@ package tk.szaszm.adatb;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
-
-import tk.szaszm.adatb.model.News;
 
 /**
  * Created by marci on 12/4/17.
