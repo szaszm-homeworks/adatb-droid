@@ -1,5 +1,7 @@
 package tk.szaszm.adatb.model;
 
+import java.util.List;
+
 import moe.banana.jsonapi2.HasMany;
 import moe.banana.jsonapi2.HasOne;
 import moe.banana.jsonapi2.JsonApi;
@@ -30,5 +32,20 @@ public class Events extends Resource {
         String exerciseCategoryType = exerciseCategory.type;
 
         return Integer.toString(seq) + ". " + exerciseCategoryType.toUpperCase() + " " + eventTemplateType.toUpperCase() + (grade > 0 ? " (" + Integer.toString(grade) + ")" : "");
+    }
+
+    public Users getDemonstrator()
+    {
+        return this.Demonstrator.get(getContext());
+    }
+
+    public EventTemplates getEventTemplate()
+    {
+        return this.EventTemplate.get(getContext());
+    }
+
+    public List<Deliverables> getDeliverables()
+    {
+        return this.Deliverables.get(this.getContext());
     }
 }

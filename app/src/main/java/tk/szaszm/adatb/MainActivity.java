@@ -36,6 +36,7 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ArrayList<DrawerItem> drawerItems = new ArrayList<>();
+    private ArrayList<Events> eventsList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +117,10 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
                 transaction.commit();
             }
         }.execute();
+    }
+
+    public Events getEventByIndex(int eventIndex) {
+        return eventsList.get(eventIndex);
     }
 
     static class RetrieveEventAsyncTask extends AsyncTask<Void, Void, Void>
@@ -205,11 +210,16 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
                     synchronized (events) {
                         events.add(ev.getEvent());
                         if(events.size() == eventIds.size()) {
+                            MainActivity.this.eventsList.clear();
                             for (Events event : events) {
+                                final Events evt = event;
                                 final String label = event.getLabel();
-                                drawerItems.add(new DrawerItem(event.getLabel(), item -> {
+                                drawerItems.add(new DrawerItem(label, item -> {
+                                    switchToEventView(evt);
                                     System.out.println(label + " clicked");
                                 }));
+
+                                MainActivity.this.eventsList.add(evt);
                             }
                         }
                     }
@@ -222,6 +232,17 @@ public class MainActivity extends Activity implements NewsFragment.OnListFragmen
                 }
             }
         }.execute();
+    }
+
+    public void switchToEventView(Events evt)
+    {
+        mainLayout.removeAllViews();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        int eventIndex = eventsList.indexOf(evt);
+        EventFragment fragment = EventFragment.newInstance(eventIndex, this);
+        transaction.add(R.id.mainLayout, fragment);
+        transaction.commit();
     }
 
     @Override

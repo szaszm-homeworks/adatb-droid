@@ -14,4 +14,9 @@ public class EventTemplates extends Resource {
     public String type;
 
     public HasOne<ExerciseCategories> ExerciseCategory;
+
+    public ExerciseCategories getExerciseCategory()
+    {
+        return ExerciseCategory.get(getContext());
+    }
 }
